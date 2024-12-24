@@ -1,6 +1,15 @@
 # Bug Bounty Methodology
-- **Dorking Search Engine** - https://freelancermijan.github.io/reconengine/, https://taksec.github.io/google-dorks-bug-bounty/, https://dorks.faisalahmed.me/#
-- **Certificate Transparency** - https://www.shodan.io/, https://search.censys.io, https://securitytrails.com, https://en.fofa.info/
+
+**Dorking Search Engine**
+- https://freelancermijan.github.io/reconengine/
+- https://taksec.github.io/google-dorks-bug-bounty/
+- https://dorks.faisalahmed.me/#
+  
+**Certificate Transparency**
+- https://www.shodan.io/
+- https://search.censys.io
+- https://securitytrails.com
+- https://en.fofa.info/
 
 **Subdomain Enumeration**
 - subfinder -d vulnweb.com >> subdomains_raw.txt
@@ -55,3 +64,21 @@
   -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0)" \
   -H "X-Forwarded-For: 127.0.0.1" \
   -o ffuf_results.txt
+
+**URL Crawling**
+- cat live_subdomains.txt | gau | tee gau.txt
+- cat live_subdomains.txt | waybackurls | tee wayback.txt
+- waymore -i "live_subdomains.txt" -n -mode U -oU waymore.txt
+- cat gau.txt wayback.txt waymore.txt | sort -u > all_urls.txt
+- cat all_urls.txt | httprobe -c 50 > live_urls.txt
+
+**Find JavaScript File Vulnerability**
+- cat live_urls.txt | grep ".js$" >> js.txt
+- nuclei -l js.txt -rl 25 -t ~/nuclei-templates/http/exposures/ -o js_bugs.txt
+- nuclei -l live_subdomains.txt -rl 15 -o Nuclei_bugs.txt
+
+
+
+
+
+
