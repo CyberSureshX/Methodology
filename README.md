@@ -149,10 +149,26 @@
 - Attempt to use the previously captured access token to make an API request (e.g., access a protected resource).
 - If the access token is still valid and the server processes the request successfully, the token is reusable post-logout, confirming the vulnerability.
 
+**9. Reuse of Email for Multiple Accounts**
+- Go to the target website's signup page.
+- Register a new account using an email address (e.g., email@gmail.com).
+- Attempt to create another account using the same email address with an alias (e.g., email+alias@gmail.com).
+- Complete the registration process for both accounts.
+- Observe if the system creates two separate accounts for the same email, bypassing validation.
 
+**10. Weak Password Policy**
+- Go to the target website's signup page.
+- Register a new account with a weak or easily guessable password (e.g., 123456 or password).
+- Complete the registration process.
+- Log into the account using the weak password.
+- Observe if the application allows the use of weak passwords without enforcing a strong password policy.
 
-
-
+**11. Lack of Email Verification**
+- Go to the target website's signup page.
+- Register a new account using a fake or invalid email address (invalid@fakeemail.com).
+- Complete the registration process without verifying the email address.
+- Log into the account and perform normal operations.
+- Observe if the account is functional despite the invalid or unverified email.
 
 
 
