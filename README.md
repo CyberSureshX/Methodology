@@ -1,15 +1,15 @@
 ## Bug Bounty Methodology
 
 **Dorking Search Engine**
-- https://freelancermijan.github.io/reconengine/
-- https://taksec.github.io/google-dorks-bug-bounty/
-- https://dorks.faisalahmed.me/#
+- `https://freelancermijan.github.io/reconengine/`
+- `https://taksec.github.io/google-dorks-bug-bounty/`
+- `https://dorks.faisalahmed.me/#`
   
 **Certificate Transparency**
-- https://www.shodan.io/
-- https://search.censys.io
-- https://securitytrails.com
-- https://en.fofa.info/
+- `https://www.shodan.io/`
+- `https://search.censys.io`
+- `https://securitytrails.com`
+- `https://en.fofa.info/`
 
 **Subdomain Enumeration**
 - subfinder -d vulnweb.com >> subdomains_raw.txt
@@ -130,7 +130,7 @@
 - Go to the target website and initiate the **OAuth authorization flow**.
 - Intercept the request using Burp Suite.
 - Locate the `redirect_uri` parameter in the intercepted URL.
-- Modify the `redirect_uri` value to an attacker-controlled malicious URL -  https://attacker.com/callback.
+- Modify the `redirect_uri` value to an attacker-controlled malicious URL -  `https://attacker.com/callback`.
 - Forward the modified request to the authorization server and continue with the OAuth flow.
 - Observe if the server redirects you to the attacker-controlled website.
 
@@ -151,8 +151,8 @@
 
 **9. Reuse of Email for Multiple Accounts**
 - Go to the target website's signup page.
-- Register a new account using an email address (e.g., email@gmail.com).
-- Attempt to create another account using the same email address with an alias (e.g., email+alias@gmail.com).
+- Register a new account using an email address (`email@gmail.com`).
+- Attempt to create another account using the same email address with an alias (`email+alias@gmail.com`).
 - Complete the registration process for both accounts.
 - Observe if the system creates two separate accounts for the same email, bypassing validation.
 
@@ -165,7 +165,7 @@
 
 **11. Lack of Email Verification**
 - Go to the target website's signup page.
-- Register a new account using a fake or invalid email address (invalid@fakeemail.com).
+- Register a new account using a fake or invalid email address (`invalid@fakeemail.com`).
 - Complete the registration process without verifying the email address.
 - Log into the account and perform normal operations.
 - Observe if the account is functional despite the invalid or unverified email.
@@ -183,7 +183,7 @@
 - Go Sign up page and Forgot password page
 - Fill the form and enter a long string in password
 - Click on enter and you’ll get 500 Internal Server errors if it is vulnerable.
-- **Reference link** - https://hackerone.com/reports/840598, https://hackerone.com/reports/738569
+- **Reference link** - `https://hackerone.com/reports/840598, https://hackerone.com/reports/738569`
 
 **3. Weak Password Policy on Password Reset Page**
 - Go to the target website's Password Reset Page.
@@ -210,9 +210,9 @@
 
 **6. Password Reset Token Leak via X-Forwarded-Host**
 - Intercept the password reset request in Burp Suite
-- Add or edit the following headers in Burp Suite : Host: attacker.com, X-Forwarded-Host: attacker.com.
+- Add or edit the following headers in Burp Suite : Host: attacker.com, X-Forwarded-Host: `attacker.com`.
 - Forward the request with the modified header.
-- Look for a password reset URL based on the host header like : https://attacker.com/reset-password.php?token=TOKEN.
+- Look for a password reset URL based on the host header like : `https://attacker.com/reset-password.php?token=TOKEN`.
 
 **7. Reset password link sent over unsecured http protocol**
 - Go to the target website and request a password reset.
@@ -241,15 +241,69 @@
 - On the password reset page, replace the current password with the payload:  
    ```html
    "><img src=x onerror=prompt(document.domain)>- 
-- Submit the form and Observe if the XSS payload executes.
+- Submit the form and observe if the XSS payload executes.
 
+**11. insufficient validation in password reset tokens.**
+- Create two accounts: one for the attacker and one for the victim.
+- Go to the target website and request a password reset for the victim's account.
+- Open the password reset link sent to the victim's email.
+- Change the token in the URL with the attacker's token.
+- Check if you are able to change the victim's password using the modified token.
+- If successful, this indicates a security flaw or bug in the system.
 
+**12. Self-XSS on Uber Password Reset Page** 
+- Go to `https://example.com/forgot-password` and initiate the password reset process.
+- Enter your email address and submit the request.
+- Open your mailbox and click on the password reset link you received.
+- On the password reset page, paste the following payload as your new password:  
+   ```html
+   "><img src=x onerror=prompt(document.domain)>
+- Submit the form and observe if the XSS payload executes.
 
+**13. Account Takeover via Password Reset Functionality**
+- Go to the password reset page of the target application.
+- Intercept the password reset request using Burp Suite.
+- Modify the email parameter in the password reset request with the following payloads one by one:  
+   - `email=victim@gmail.com&email=attacker@gmail.com`  
+   - `email=victim@gmail.com%20email=attacker@gmail.com`  
+   - `email=victim@gmail.com|email=attacker@gmail.com`  
+   - `email=victim@gmail.com%0d%0acc:attacker@gmail.com`  
+   - `email=victim@gmail.com&code=<attacker's password reset token>`  
+- Forward the modified request to the server.
+- Check if the attacker’s email receives the password reset link or token.
 
+**14. Missing Expiry for Reset Token**
+- Go to the target website's password reset page.
+- Submit the request with the victim's email address to trigger a password reset link.
+- Wait for the reset email to be received (`victim@example.com`).
+- Attempt to use the reset token after a long period (after 24 hours, 1 week, etc.) to reset the password again.
+- Observe if the token is still valid and allows password resetting after the expected expiration time.
+- If the token works after an extended period, the vulnerability is confirmed.
 
+## EMAIL VERIFICATION FUNCTIONALITY BYPASS
 
+**1. Email verification bypass after signup**
+* Sign up on the web application using `attacker@mail.com`.
+* You will receive a confirmation email on `attacker@mail.com`, but do not open that link.
+* The application may ask for email confirmation. Check if it allows you to navigate to the account settings page without verification.
+* On the settings page, check if you can change the email.
+* If allowed, change the email to `victim@mail.com`.
+* You will be asked to confirm `victim@mail.com` by opening the confirmation link received on `victim@mail.com`. 
+* Instead of opening the new link, go to `attacker@mail.com` inbox and open the previously received link.
+* If the application verifies `victim@mail.com` using the previous verification link from `attacker@mail.com`, then this is an email verification bypass.
 
+**2. Email Authentication Bypass in the account registration process**
+* Create an account with `attacker@gmail.com`. Upon registration, you will receive an email verification link.
+* Click the link and verify the attacker account.
+* Go to the Edit Profile page and change the email to `victim@gmail.com`.
+* After changing the email, log out of the attacker account. You will receive a message: "A verification email has been sent to the new updated email."
+* Go to `attacker@gmail.com` inbox and click on the same verification link that was sent to you during initial registration.
+* Now go to the login page and enter `attacker@gmail.com` and the attacker’s password.
+* If successful, you have bypassed the email authentication.
 
-
-
-
+**3. Email Verification Bypass leads to account takeover**
+* Register any email address without verifying it.
+* Attempt to register an account again, but use a different method ('Sign up with Google') using the same email address.
+* The email verification is successfully bypassed.
+* The attacker can now log in using the victim's account, bypassing the verification methods.
+* **Reference**: [HackerOne Report 1074047](https://hackerone.com/reports/1074047).
