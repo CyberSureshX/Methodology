@@ -335,6 +335,94 @@
 - Then, try logging in with an invalid username and incorrect password.
 - Observe the error messages. If they differ, the application may be vulnerable to account enumeration.
 
+## SESSION MANAGEMENT RELATED VULNERABILITIES
+
+**1. Session Hijacking**
+- Create an account on the target application.
+- Log into your account using any browser.
+- Use a browser extension such as Cookie Editor to view and copy the session cookies.
+- Logout of your account in the current browser.
+- Open a different browser or private/incognito window.
+- Paste the copied cookies using the Cookie Editor extension.
+- Refresh the page.
+- If you are logged in, the session hijacking vulnerability exists.
+
+**2. Old Session Does Not Expire After Password Change**
+- Create an account on the target application.
+- Log into your account using two different browsers (e.g., Chrome and Firefox) with the same credentials.
+- In the **Chrome** browser, navigate to the account settings and change your password.
+- Refresh the session in the Firefox browser.
+- If the session in Firefox is still active, the vulnerability exists.
+
+**3. Old Session Does Not Expire After Email Change**
+- Create an account on the target application.
+- Log into your account using two different browsers (e.g., Chrome and Firefox) with the same credentials.
+- In the **Chrome** browser, update your email address in the account settings.
+- Refresh the session in the Firefox browser.
+- If the session in Firefox is still active, the vulnerability exists.
+
+**4. Session Token in URL**
+- Interact with the application and monitor URLs for session tokens.
+- Validate if the session token is logged in server logs or sent in the Referer header to external sites.
+- Use the session token from the URL in a separate request to verify if it provides access.
+
+**5. Session Timeout Issues**
+- Log into the application and note the session ID in the browser's cookies.
+- Stay idle for an extended period (e.g., 30 minutes or longer) and attempt to perform an action.
+- Validate if the session remains active despite the inactivity.
+- Log out and attempt to use the same session ID to validate if the session was invalidated.
+
+## TWO-FACTOR AUTHENTICATION (2FA) FUNCTIONALITY BYPASS
+
+**1. OTP Bypass on Register Account via Response Manipulation**
+- Register an account using your mobile number and request an OTP.
+- Enter an incorrect OTP and intercept the request in Burp Suite.
+- Intercept the response and modify it:
+- Original Response: `{"verificationStatus":false,"mobile":9072346577,"profileId":"84673832"}`
+- Modified Response: `{"verificationStatus":true,"mobile":9072346577,"profileId":"84673832"}`
+- Forward the modified response to bypass OTP verification.
+
+ **2. OTP Bypass via Response Manipulation During Login**
+- Attempt to log in using your credentials and wait for the OTP prompt.
+- Enter an incorrect OTP and intercept the request using Burp Suite.
+- Intercept the response to this request:
+- Original Response: `{"error":"Invalid OTP"}`
+- Modified Response: `{"status":"success"}`
+- Forward the response to bypass the OTP validation and gain access.
+
+ **3. OTP Status Manipulation**
+- Register two accounts using different mobile numbers.
+- For the first account, enter the correct OTP and intercept the response in Burp Suite:
+- Example: `{"status":1}`
+- For the second account, enter an incorrect OTP and intercept the response.
+- Original Response: `{"status":0}`
+- Modified Response: `{"status":1}`
+- Forward the modified response to bypass the OTP check and access the account.
+
+**4. OTP Bypass Using Developer’s Check**
+- Navigate to the target website’s OTP-based login or registration page.
+- Inspect the "Continue" or "Submit" button using browser developer tools.
+- Locate the JavaScript function responsible for OTP validation (e.g., `checkOTP(event)`).
+- Check the JavaScript code for:
+- Hardcoded OTPs.
+- Debugging logs or bypass conditions.
+- Use the discovered OTP or manipulate the function to bypass the verification.
+
+**5. OTP Reuse**
+- Some applications fail to invalidate previous OTPs after a new one is requested.
+- Request an OTP and note it down.
+- Request a new OTP but use the first OTP to complete verification.
+
+**6. Brute Force Attack**
+- Weak implementations may not limit OTP attempts.
+- Automate multiple OTP submission attempts using tools like Burp Suite Intruder.
+- Use a range of predictable OTP values (e.g., `0000-9999`).
+
+**7. Lack of OTP Expiry**
+- If OTPs do not expire, previously used OTPs may still be valid.
+- Save an old OTP.
+- Test it after several hours or days to see if it still works.
+
 ## OPEN REDIRECTION VULNERABILITY
 **1. First Method**
 * Go to `https://www.private.com`.
@@ -414,6 +502,102 @@ echo testphp.vulnweb.com | waybackurls | gf xss | uro | qsreplace '"><img src=x 
 ```
 echo testphp.vulnweb.com | httpx -silent | hakrawler -subs | grep "=" | qsreplace '"><svg onload=confirm(1)>' | airixss -payload "confirm(1)" | egrep -v 'Not'
 ```
+
+**9. New Way To Find Simple Cross-Site Scripting (XSS)**
+- Go to `example.com` where you can see the chat system on the right side of the website.
+- Locate and click on the "Other Information" section where you are prompted to enter your details.
+- In the Full Name field, enter the following XSS payload:
+     ```html
+     <img src=1 onerror=alert(1)>
+     ```
+- Enter your email and contact number in the respective fields as required by the form.
+- Click the **Submit** or **Process** button to submit the form.
+- Upon submission, the injected JavaScript payload will trigger an alert with the message `1`, indicating a successful XSS attack.
+
+## Testing Host Header Injection Vulnerability
+**1. Add Extra Header**
+```
+Host: vulnerable-website.com:attacker-website.com
+Host: attacker-website.com.vulnerable-website.com
+```
+**2. Inject Duplicate Host Headers**
+```
+Host: vulnerable-website.com
+Host: attacker-website.com
+```
+**3. Supply an Absolute URL**
+```
+GET https://vulnerable-website.com/ HTTP/1.1
+Host: attacker-website.com
+```
+**4. Add Line Wrapping**
+```
+GET /example HTTP/1.1
+Host: attacker-website.com
+Host: vulnerable-website.com
+```
+**5. Inject Host Override Headers**
+```
+GET /example HTTP/1.1
+Host: vulnerable-website.com
+X-Forwarded-Host: attacker-website.com
+```
+
+# Cross-Site Request Forgery (CSRF) Testing
+**1. Common Flaws in CSRF Token Validation**
+- Log in to the target application.
+- Interact with the functionality requiring a CSRF token.
+- Intercept the HTTP request using a proxy tool (e.g., Burp Suite or OWASP ZAP).
+- Remove the entire CSRF token parameter from the intercepted request.
+- Forward the request and observe whether the application processes it successfully.
+- Generate a Proof of Concept (POC) for ethical demonstration.
+
+**2. CSRF Token Not Tied to User Session**
+- Log in to the application using Account A in Browser 1.
+- Intercept a request with a valid CSRF token.
+- Log in using Account B in Browser 2.
+- Use the CSRF token from Account A to craft a request for Account B.
+- Check if the action succeeds, revealing the token is not tied to the session.
+
+**3. CSRF Token Tied to Non-Session Cookie**
+- Intercept a request and note the associated cookies.
+- Remove the cookie headers entirely from the intercepted request.
+- Replay the request and observe whether the CSRF protection fails.
+- Generate a POC based on this behavior for ethical reporting.
+
+**4. Bypassing Referrer-Based CSRF Defenses**
+- Intercept a request and identify the `Referer` header.
+- Modify the header to simulate a malicious domain.
+- Suppress the referrer header using `<meta name="referrer" content="no-referrer">` or similar techniques.
+- Replay the request and check for CSRF validation bypass.
+
+**5. Send Null Value in CSRF Token**
+- Intercept a request containing the CSRF token.
+- Replace the token value with `null` or an empty string.
+- Replay the request and check if the server accepts it without proper validation.
+
+**6. Change CSRF Value and Add Same-Length String**
+- Intercept a request containing the CSRF token.
+- Modify the token value by appending or replacing it with a same-length string.
+- Replay the request and observe whether the server accepts the modified token.
+
+**7. Switching Request Methods**
+- Intercept a POST request.
+- Change the method to GET.
+- Remove any `Content-Type` headers if present.
+- Replay the request and check if the server executes the action.
+
+** 8. Switching Content Types**
+- Intercept a JSON or URL-encoded request containing a CSRF token.
+- Modify the `Content-Type` header to `multipart/form-data`.
+- Replay the request and observe whether the server processes the altered request.
+
+**9. References**
+- [OWASP CSRF Prevention Cheat Sheet](https://owasp.org/www-project-cheat-sheets/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html)
+- [Burp Suite CSRF Testing Guide](https://portswigger.net/web-security/csrf)
+
+
+
 
 
 
