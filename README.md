@@ -170,5 +170,86 @@
 - Log into the account and perform normal operations.
 - Observe if the account is functional despite the invalid or unverified email.
 
+## PASSWORD RESET PAGE FUCNTIONALITY VULNERABILITIES 
+
+**1. No Rate Limiting on Password Reset functionality**
+- Find the reset password page on the web application.
+- Enter the email then click reset password
+- Intercept this request in burp suite..
+- Send it to the intruder and repeat it 50 times.
+- You will get 200 OK status.
+
+**2. Denial of service when entering a long password**
+- Go Sign up page and Forgot password page
+- Fill the form and enter a long string in password
+- Click on enter and you’ll get 500 Internal Server errors if it is vulnerable.
+- **Reference link** - https://hackerone.com/reports/840598, https://hackerone.com/reports/738569
+
+**3. Weak Password Policy on Password Reset Page**
+- Go to the target website's Password Reset Page.
+- Enter a valid registered email address and submit the password reset request.
+- Click on the link to navigate to the password reset form.
+- Enter a weak password (e.g., 123456, password, qwerty) in the new password field.
+- Log in to the account using the weak password you set during the reset process.
+
+**4. No Rate Limit On Login With Weak Password Policy**
+- Create an account with a weak password.
+- Log in with your account.
+- Capture the request in BurpSuite.
+- Send the captured request to Intruder.
+- Set payload position in the password field.
+- Attempt to brute force the password.
+- If successful, the victim's password will be cracked.
+
+**5. Password reset token leakage via referrer**
+- Go to the target website and request for password reset.
+- Now check your email and you will get your password reset link.
+- Click on any social media link you see in that email and password reset page.
+- Don't change the password before clicking on any external links like social media links for the same website.
+- Capture that request in burp suite, You will find a reset token in the referer header.
+
+**6. Password Reset Token Leak via X-Forwarded-Host**
+- Intercept the password reset request in Burp Suite
+- Add or edit the following headers in Burp Suite : Host: attacker.com, X-Forwarded-Host: attacker.com.
+- Forward the request with the modified header.
+- Look for a password reset URL based on the host header like : https://attacker.com/reset-password.php?token=TOKEN.
+
+**7. Reset password link sent over unsecured http protocol**
+- Go to the target website and request a password reset.
+- Check email, you will get a reset password link.
+- Copy that link paste in the notepad and observe the protocol.
+
+**8. Password Reset Link not expiring after changing password**
+- First You need to create an account with a Valid Email Address.
+- After Creating An Account log out from your Account and Navigate to Forgot Password Page.
+- Request a Password Reset Link for your Account.
+- Use The Password Reset Link And Change The Password, After Changing the Password Login to Your Account.
+- Now Use The Old Password Reset Link To Change The Password Again.
+- If You Are Able to Change Your Password Again Then This Is a Bug.
+
+**9. Password Reset Link not expiring after changing the email**
+- Send the password reset link to your email.
+- Don`t open the password link, just copy it and paste into any editor, Open your account.
+- Go to your account settings. Under account, you will see Account Overview.
+- Go to the Email and password Option and change the email and verify it.
+- After changing the email go to your password reset link which you copied.
+
+**10. Self-XSS on Password Reset Page**
+- Go to `https://target.com/forgot-password` and initiate the password reset process.
+- Enter the email address where you will receive the password reset link.
+- Open your mailbox and click on the password reset link you received.
+- On the password reset page, replace the current password with the payload:  
+   ```html
+   "><img src=x onerror=prompt(document.domain)>- 
+- Submit the form and Observe if the XSS payload executes.
+
+
+
+
+
+
+
+
+
 
 
