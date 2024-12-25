@@ -1,4 +1,4 @@
-# Bug Bounty Methodology
+## Bug Bounty Methodology
 
 **Dorking Search Engine**
 - https://freelancermijan.github.io/reconengine/
@@ -76,6 +76,80 @@
 - cat live_urls.txt | grep ".js$" >> js.txt
 - nuclei -l js.txt -rl 25 -t ~/nuclei-templates/http/exposures/ -o js_bugs.txt
 - nuclei -l live_subdomains.txt -rl 15 -o Nuclei_bugs.txt
+
+## SIGNUP PAGE FUNCTIONALITY VULNERABILITIES 
+
+**1. No Rate Limit at Signup Page**
+- Enter your details in signup form and submit the form
+- Capture the signup request and send it to intruder
+- add $$ to email parameter
+- In the payload add different email address
+- Fire up intruder and check whether it return 200 ok
+
+**2. Hyper Link Injection Vulnerability**
+- Visit the target website's registration page.
+- Enter evil.com (or any malicious URL) as the First Name and Last Name field.
+- Complete the registration process with valid details.
+- Now check  your email  and you notice there is malicious hyperlinks.
+
+**3. Server Side Template Injection**
+- Navigate to the Signup page.
+- Now, in the First Name field, enter the value {{7*7}}
+- Fill in the rest of the values on the Register page and register your account.
+- We have used the payload {{7*7}} here to verify that it is being evaluated at the backend.
+- Now, wait for the welcome/promotional email to arrive in your Inbox.
+- Notice that the email arrives with the Subject as 49.
+
+**4. HTML Injection Vulnerability**
+- Visit the target website's input fields (e.g., Registration Page, Feedback Form, Profile Update, or Search Bar).  
+- Enter the following payloads on any user input field:  
+  - `<h1>welcome</h1>`  
+  - `<a href="https://evil.com">Click Me</a>`  
+- Verify if the input is displayed directly on the website without escaping or sanitization.  
+
+**5. Reflected XSS on Signup Page and Login Page**
+- Go to `https://example.com/signup`.  
+- Fill out the signup form but **do not submit** it.  
+- Open **Burp Suite** and capture the submit request.  
+- Modify the parameter values as follows:  
+  - **Email Field**: Replace the email parameter with:  
+    ```html
+    <img src=x onerror=alert(document.domain)>
+    ```
+  - **Username Field**: Replace with:  
+    ```html
+    <svg/onload=confirm(1)>
+    ```
+  - Additional Payload for Email:  
+    ```html
+    a7madn1@gmail.com'"><svg/onload=alert(/xss/)>, “><svg/onload=confirm(1)>”@x.y
+    ```
+- Forward the request and turn the intercept off.  
+
+**6. OAuth Redirect URI Manipulation**
+- Go to the target website and initiate the **OAuth authorization flow**.
+- Intercept the request using Burp Suite.
+- Locate the `redirect_uri` parameter in the intercepted URL.
+- Modify the `redirect_uri` value to an attacker-controlled malicious URL -  https://attacker.com/callback.
+- Forward the modified request to the authorization server and continue with the OAuth flow.
+- Observe if the server redirects you to the attacker-controlled website.
+
+**7. Attacker creates an account**
+- Attacker creates an account on the client application using the victim's email address (`victim@example.com`).
+- The attacker is prompted to verify the email address, but does not complete the verification process.
+- The victim register on the client application using a different signup method **OAuth flow** with the same email address (`victim@example.com`).
+- The victim logs into the client application via the OAuth flow, successfully creating an account and bypassing the email verification process.
+- The attacker logs into the client application using the victim’s email address and the attacker’s password.
+- Observe if the attacker gains unauthorized access to the victim's account and can view or manipulate any data added by the victim.
+
+**8. Reusability of an OAuth Access Token**
+- Log in to the client application using your credentials via the OAuth flow and capture the access token issued by the authorization server using Burp Suite.
+- Log out of the application to terminate your session.
+- Intercept the logout request to ensure that no explicit token revocation request is sent to the authorization server.
+- Attempt to use the previously captured access token to make an API request (e.g., access a protected resource).
+- If the access token is still valid and the server processes the request successfully, the token is reusable post-logout, confirming the vulnerability.
+
+
 
 
 
