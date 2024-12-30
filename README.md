@@ -31,8 +31,8 @@
 - nmap -iL ips.txt -sV
 
 **Directory and File Brute Forcing**
-
-- sudo dirsearch -l live_subdomains.txt \
+```
+sudo dirsearch -l live_subdomains.txt \
   --exclude-status 400,401,402,403,404,429,500,501,502,503 \
   --include-status 200,301,302 \
   -e html,php,txt,pdf,js,css,zip,bak,old,log,json,xml,config,env,asp,aspx,jsp,gz,tar,sql,db \
@@ -44,7 +44,7 @@
   --output dirsearch_results.txt
 
 
-- feroxbuster -u https://my.vultr.com/ \
+feroxbuster -u https://my.vultr.com/ \
   -w /usr/share/seclists/Discovery/Web-Content/raft-large-directories.txt \
   --insecure -d 2 -L 4 -e -t 20 \
   --random-agent \
@@ -52,7 +52,7 @@
   --silent \
   --output feroxbuster_results.txt
 
-- ffuf -w /usr/share/seclists/Discovery/Web-Content/directory-list-2.3-big.txt \
+ffuf -w /usr/share/seclists/Discovery/Web-Content/directory-list-2.3-big.txt \
   -u https://my.vultr.com/FUZZ \
   -fc 400,401,402,403,404,429,500,501,502,503 \
   -mc 200,301,302 \
@@ -64,19 +64,21 @@
   -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0)" \
   -H "X-Forwarded-For: 127.0.0.1" \
   -o ffuf_results.txt
-
+```
 **Information Disclosure on Restricted Subdomain**
 ```
-- subfinder -d target | httpx -mc 403 -o 403_sub.txt
-- cat 403_sub.txt | dirsearch --stdin --exclude-status=401,404,403,429,500,503 \
+subfinder -d target | httpx -mc 403 -o 403_sub.txt
+
+cat 403_sub.txt | dirsearch --stdin --exclude-status=401,404,403,429,500,503 \
   -e conf,config,bak,backup,swp,old,db,sql,asp,aspx,py,rb,php,bkp,cache,cgi,conf,csv,html,jar,js,json,jsp,lock,log,rar,sql.gz,sql.zip,sql.tar.gz,tar,tar.bz2,tar.gz,txt,wadl,zip,xml \
   --random-agent --threads 50 -t 10 --exclude-sizes 0B --delay 0.5 -o dir.txt
 ```
 
 **Find Sensitive files in URLS**
 ```
-- katana -u subdomains_alive.txt -d 5 -ps -pss waybackarchive,commoncrawl,alienvault -kf -jc -fx -ef woff,css,png,svg,jpg,woff2,jpeg,gif,svg -o allurls.txt
-- cat allurls.txt | grep -E '\.xls|\.xml|\.xlsx|\.json|\.pdf|\.sql|\.doc|\.docx|\.pptx|\.txt|\.zip|\.tar\.gz|\.tgz|\.bak|\.7z|\.rar|\.log|\.cache|\.secret|\.db|\.backup|\.yml|\.gz|\.config|\.csv|\.yaml|\.md|\.md5'
+katana -u subdomains_alive.txt -d 5 -ps -pss waybackarchive,commoncrawl,alienvault -kf -jc -fx -ef woff,css,png,svg,jpg,woff2,jpeg,gif,svg -o allurls.txt
+
+cat allurls.txt | grep -E '\.xls|\.xml|\.xlsx|\.json|\.pdf|\.sql|\.doc|\.docx|\.pptx|\.txt|\.zip|\.tar\.gz|\.tgz|\.bak|\.7z|\.rar|\.log|\.cache|\.secret|\.db|\.backup|\.yml|\.gz|\.config|\.csv|\.yaml|\.md|\.md5'
 ```
 
 **URL Crawling**
