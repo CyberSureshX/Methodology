@@ -22,7 +22,7 @@
 
 
 **Check Subdomain Takeover Vulnerability**
-- subzy run --targets live_subdomains.txt --vuln --output subzy_results.txt
+- subzy run --targets live_subdomains.txt --concurrency 100 --hide_fails --verify_ssl
 - nuclei -l live_subdomains.txt -t ~/nuclei-templates/http/takeovers/ -o nuclei_takeover_results.txt
 - subjack -w live_subdomains.txt -t 100 -timeout 30 -ssl -c ~/BUGBOUNTY/fingerprints.json -v -o subjack_results.txt
 
@@ -73,6 +73,12 @@
   --random-agent --threads 50 -t 10 --exclude-sizes 0B --delay 0.5 -o dir.txt
 ```
 
+**Find Sensitive files in URLS**
+```
+- katana -u subdomains_alive.txt -d 5 -ps -pss waybackarchive,commoncrawl,alienvault -kf -jc -fx -ef woff,css,png,svg,jpg,woff2,jpeg,gif,svg -o allurls.txt
+- cat allurls.txt | grep -E '\.xls|\.xml|\.xlsx|\.json|\.pdf|\.sql|\.doc|\.docx|\.pptx|\.txt|\.zip|\.tar\.gz|\.tgz|\.bak|\.7z|\.rar|\.log|\.cache|\.secret|\.db|\.backup|\.yml|\.gz|\.config|\.csv|\.yaml|\.md|\.md5'
+```
+
 **URL Crawling**
 - cat live_subdomains.txt | gau | tee gau.txt
 - cat live_subdomains.txt | waybackurls | tee wayback.txt
@@ -84,6 +90,7 @@
 - cat live_urls.txt | grep ".js$" >> js.txt
 - nuclei -l js.txt -rl 25 -t ~/nuclei-templates/http/exposures/ -o js_bugs.txt
 - nuclei -l live_subdomains.txt -rl 15 -o Nuclei_bugs.txt
+- echo example.com | katana -d 5 | grep -E '\.js$' | nuclei -t nuclei-templates/http/exposures/ -c 30
 
 ## SIGNUP PAGE FUNCTIONALITY VULNERABILITIES 
 
@@ -330,7 +337,7 @@
 - [Payload List (Auth Bypass)](https://github.com/payloadbox/sql-injection-payload-list/blob/master/Intruder/exploit/Auth_Bypass.txt)
 - [Web Application Wordlist](https://github.com/p0dalirius/webapp-wordlists/tree/main)
 
-**2. Brute Force Attack **
+**2. Brute Force Attack**
 - Go to the login page of the application.
 - Use a tool like Hydra or Burp Suite's Intruder to automate login attempts with common password lists.
 - Monitor the login attempts to see if the application allows multiple attempts without rate-limiting or blocking.
@@ -551,7 +558,7 @@ Host: vulnerable-website.com
 X-Forwarded-Host: attacker-website.com
 ```
 
-# Cross-Site Request Forgery (CSRF) Testing
+## Cross-Site Request Forgery (CSRF) Testing
 **1. Common Flaws in CSRF Token Validation**
 - Log in to the target application.
 - Interact with the functionality requiring a CSRF token.
