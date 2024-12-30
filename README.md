@@ -729,23 +729,25 @@ X-Forwarded-Host: attacker-website.com
 **5. Changing the User-Agent String**
 
 - Technique: Web servers sometimes block certain user-agents or have rules set for specific browsers or bots. Try changing the User-Agent to mimic a different browser or bot.
-- User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36
-- User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Firefox/89.0
-- User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:45.0) Gecko/20100101 Firefox/45.0
-- User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36
-- User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36
-- User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0
-- User-Agent: Mozilla/5.0 (Linux; Android 10; SM-G950F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Mobile Safari/537.36
-
+```
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Firefox/89.0
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:45.0) Gecko/20100101 Firefox/45.0
+User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0
+User-Agent: Mozilla/5.0 (Linux; Android 10; SM-G950F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Mobile Safari/537.36
+```
 **6. Changing the Accept-Encoding Header**
 
 - Technique: The server might block requests based on certain encodings. Try changing or removing the Accept-Encoding header to see if this bypasses the restriction.
-- Accept-Encoding: gzip, deflate
-- Accept-Encoding: br 
-- Accept-Encoding: identity
-- Accept-Encoding: *
-- Accept-Encoding: gzip;q=0.9, deflate;q=0.8
-
+```
+Accept-Encoding: gzip, deflate
+Accept-Encoding: br 
+Accept-Encoding: identity
+Accept-Encoding: *
+Accept-Encoding: gzip;q=0.9, deflate;q=0.8
+```
 **7. Using Different Port Numbers**
 
 - In Burp Suite, intercept the request and change the protocol:
@@ -755,16 +757,17 @@ X-Forwarded-Host: attacker-website.com
 
 - Technique: Modify HTTP headers to spoof the origin IP or bypass geo-based restrictions. These can help you evade rate-limiting or 403 protections that are based on IP detection.
 **Headers to spoof:**
-- X-Forwarded-For: 127.0.0.1
-- X-Forwarded-By: 127.0.0.1
-- X-Forwarded-For-Original: 127.0.0.1
-- X-Custom-IP-Authorization: 127.0.0.1
-- X-Originating-IP: 127.0.0.1
-- X-Remote-IP: 127.0.0.1
-- X-Remote-Addr: 127.0.0.1
-- Forwarded-For: 127.0.0.1
-- More info: Use bypass rate-limiting payloads from repositories like: https://github.com/blackangl1/bypass-rate-limit-payloads/blob/main/payload.txt
-
+```
+X-Forwarded-For: 127.0.0.1
+X-Forwarded-By: 127.0.0.1
+X-Forwarded-For-Original: 127.0.0.1
+X-Custom-IP-Authorization: 127.0.0.1
+X-Originating-IP: 127.0.0.1
+X-Remote-IP: 127.0.0.1
+X-Remote-Addr: 127.0.0.1
+Forwarded-For: 127.0.0.1
+More info: Use bypass rate-limiting payloads from repositories like: https://github.com/blackangl1/bypass-rate-limit-payloads/blob/main/payload.txt
+```
 **9. URL Encoding and Double URL Encoding**
 
 - Technique: Certain security mechanisms might only look for specific patterns in URLs or parameters. URL encoding and double encoding can be used to bypass some filters.
