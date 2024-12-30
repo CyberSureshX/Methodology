@@ -660,3 +660,153 @@ X-Forwarded-Host: attacker-website.com
 - Observe that the browser redirects to https://google.com.
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Advanced Techniques to Bypass No Rate Limiting, 403 Restrictions and Captcha Validation.
+
+**1. Customizing HTTP Methods**
+- Technique: If a request is being blocked on GET, change the method to OPTIONS, HEAD, POST, PUT, DELETE, TRACE, CONNECT.
+
+**2. Null Payload Injection**
+
+- Technique: Inject null payloads in various request fields, including query parameters, headers, or body.
+- Example: test@email.com%00 or use null characters in session/cookie headers like session=abcd%00.
+- Payloads: 
+
+**3. Using Different HTTP Protocol Versions**
+
+- Technique: Modify the HTTP version to test if the server responds differently.
+- Bypass Tip: Switch between HTTP/1.0, HTTP/1.1, HTTP/2.0, and HTTPS/HTTP to bypass rate-limits or restrictions based on protocol version.
+
+**4. Referer and Origin Header Spoofing**
+
+- Technique: Some websites check the Referrer header to verify if a request is coming from an allowed source. By changing or spoofing the Referrer header, you may be able to bypass the 403 restriction.
+- Example: Change Referer: http://trusted.com or Origin: http://trusted.com to bypass restrictions based on referer or origin checks.
+
+**5. Changing the User-Agent String**
+
+- Technique: Web servers sometimes block certain user-agents or have rules set for specific browsers or bots. Try changing the User-Agent to mimic a different browser or bot.
+- User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36
+- User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Firefox/89.0
+- User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:45.0) Gecko/20100101 Firefox/45.0
+- User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36
+- User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36
+- User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0
+- User-Agent: Mozilla/5.0 (Linux; Android 10; SM-G950F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Mobile Safari/537.36
+
+**6. Changing the Accept-Encoding Header**
+
+- Technique: The server might block requests based on certain encodings. Try changing or removing the Accept-Encoding header to see if this bypasses the restriction.
+- Accept-Encoding: gzip, deflate
+- Accept-Encoding: br 
+- Accept-Encoding: identity
+- Accept-Encoding: *
+- Accept-Encoding: gzip;q=0.9, deflate;q=0.8
+
+**7. Using Different Port Numbers**
+
+- In Burp Suite, intercept the request and change the protocol:
+- Change https:// to http:// or http:// to https:// and send the request.
+
+**8. HTTP Header Manipulation to Spoof IP and Evade Detection**
+
+- Technique: Modify HTTP headers to spoof the origin IP or bypass geo-based restrictions. These can help you evade rate-limiting or 403 protections that are based on IP detection.
+**Headers to spoof:**
+- X-Forwarded-For: 127.0.0.1
+- X-Forwarded-By: 127.0.0.1
+- X-Forwarded-For-Original: 127.0.0.1
+- X-Custom-IP-Authorization: 127.0.0.1
+- X-Originating-IP: 127.0.0.1
+- X-Remote-IP: 127.0.0.1
+- X-Remote-Addr: 127.0.0.1
+- Forwarded-For: 127.0.0.1
+- More info: Use bypass rate-limiting payloads from repositories like: https://github.com/blackangl1/bypass-rate-limit-payloads/blob/main/payload.txt
+
+**9. URL Encoding and Double URL Encoding**
+
+- Technique: Certain security mechanisms might only look for specific patterns in URLs or parameters. URL encoding and double encoding can be used to bypass some filters.
+- Simple and Double URL Encoding: Encode characters like /, ?, and & to make requests bypass filters.
+
+**10. Case Sensitivity Payloads**
+
+- Technique: Some web servers are case-sensitive, and altering the case of certain parameters value and mail might bypass rate-limiting or filtering checks.
+- Rate limit in: victim@gmaii.com email address
+- Rate limit bypass : Victim@gmaii.com, and 10 more request
+- Rate limit bypass : VIctim@gmaii.com and 10 more request
+
+**11. IP Rotation Technique to bypass**
+
+- Navigate to the Forgot Password page of the target website.
+- Submit a password reset request using your email address.
+- capture the Forgot Password request in burp suite.
+- Looped the request 50 times, from 127.0.0.1 till 127.0.0.50 (value of the X-Forwarded-For header).
+- Check the responses to ensure that the rate limit is being bypassed and that each request is processed as if it came from a different IP address.
+
+**12. Response Manipulation to Bypass Restrictions (Rate Limiting/403 Errors/Captcha).**
+
+- Use Burp Suite to capture the original request when interacting with the target application.
+- After the application blocks your attempts (e.g., due to rate limiting or 403 restrictions), make multiple further attempts.
+- Capture the blocking request in Burp Suite.
+- Manipulate the response, changing it from invalid to valid, to make it appear as though the restriction has been bypassed.
+
+**13. Reuse Previous Captcha**
+
+- se Burp Suite to capture the original request containing the captcha challenge.
+- Solve the captcha manually or extract the valid solution from the original request.
+- Intercept a new request with the captcha challenge and replace the solved captcha value with the previous one.
+- Forward the modified request to the server and verify if it bypasses the captcha.
+
+**14. Submit Empty Captcha**
+
+- Use Burp Suite to capture the request that includes the captcha field.
+- Modify the request by removing or leaving the captcha field empty.
+- Forward the request to the server to check if it successfully bypasses the captcha validation.
+
+**15. Remove the Captcha Parameter on Your Request**
+
+- Use Burp Suite to capture the request containing the captcha parameter.
+- In the intercepted request, remove the captcha-related parameter entirely.
+- Forward the request to see if the server processes it without validating the captcha.
