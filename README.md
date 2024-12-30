@@ -65,6 +65,14 @@
   -H "X-Forwarded-For: 127.0.0.1" \
   -o ffuf_results.txt
 
+**Information Disclosure on Restricted Subdomain**
+```
+- subfinder -d target | httpx -mc 403 -o 403_sub.txt
+- cat 403_sub.txt | dirsearch --stdin --exclude-status=401,404,403,429,500,503 \
+  -e conf,config,bak,backup,swp,old,db,sql,asp,aspx,py,rb,php,bkp,cache,cgi,conf,csv,html,jar,js,json,jsp,lock,log,rar,sql.gz,sql.zip,sql.tar.gz,tar,tar.bz2,tar.gz,txt,wadl,zip,xml \
+  --random-agent --threads 50 -t 10 --exclude-sizes 0B --delay 0.5 -o dir.txt
+```
+
 **URL Crawling**
 - cat live_subdomains.txt | gau | tee gau.txt
 - cat live_subdomains.txt | waybackurls | tee wayback.txt
