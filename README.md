@@ -12,24 +12,26 @@
 - `https://en.fofa.info/`
 
 **Subdomain Enumeration**
-- subfinder -d vulnweb.com >> subdomains_raw.txt
-- assetfinder --subs-only vulnweb.com >> subdomains_raw.txt
-- findomain -t vulnweb.com >> subdomains_raw.txt
-- python3 sublist3r.py -d vulnweb.com -o sublist3r_output.txt
-- sort -u subdomains.txt | grep vulnweb.com > subdomains_cleaned.txt
-- dnsx -l subdomains_cleaned.txt -o resolved_subdomains.txt --silent
-- httpx -l resolved_subdomains.txt -o live_subdomains.txt
-
+```
+subfinder -d vulnweb.com >> subdomains_raw.txt
+assetfinder --subs-only vulnweb.com >> subdomains_raw.txt
+findomain -t vulnweb.com >> subdomains_raw.txt
+python3 sublist3r.py -d vulnweb.com -o sublist3r_output.txt
+dnsx -l subdomains_raw.txt -o resolved_subdomains.txt --silent
+httpx -l resolved_subdomains.txt -o live_subdomains.txt
+```
 
 **Check Subdomain Takeover Vulnerability**
-- subzy run --targets live_subdomains.txt --concurrency 100 --hide_fails --verify_ssl
-- nuclei -l live_subdomains.txt -t ~/nuclei-templates/http/takeovers/ -o nuclei_takeover_results.txt
-- subjack -w live_subdomains.txt -t 100 -timeout 30 -ssl -c ~/BUGBOUNTY/fingerprints.json -v -o subjack_results.txt
-
+```
+subzy run --targets live_subdomains.txt --concurrency 100 --hide_fails --verify_ssl
+nuclei -l live_subdomains.txt -t ~/nuclei-templates/http/takeovers/ -o nuclei_takeover_results.txt
+subjack -w live_subdomains.txt -t 100 -timeout 30 -ssl -c ~/BUGBOUNTY/fingerprints.json -v -o subjack_results.txt
+```
 **Find IP Address with Domain**
-- subfinder -d "example.com" -recursive -all -silent | subprober -ip | grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | sort -u | tee ips.txt 
-- nmap -iL ips.txt -sV
-
+```
+subfinder -d "example.com" -recursive -all -silent | httpx -silent -ip | grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | sort -u | tee ips.txt
+nmap -iL ips.txt -sV
+```
 **Directory and File Brute Forcing**
 ```
 sudo dirsearch -l live_subdomains.txt \
