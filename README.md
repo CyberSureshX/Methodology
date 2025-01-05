@@ -162,16 +162,16 @@ cat allurls.txt | grep -E '\.xls|\.xml|\.xlsx|\.json|\.pdf|\.sql|\.doc|\.docx|\.
 - Observe if the attacker gains unauthorized access to the victim's account and can view or manipulate any data added by the victim.
 
 **8. Reusability of an OAuth Access Token**
-- Log in to the client application using your credentials via the OAuth flow and capture the access token issued by the authorization server using Burp Suite.
-- Log out of the application to terminate your session.
-- Intercept the logout request to ensure that no explicit token revocation request is sent to the authorization server.
-- Attempt to use the previously captured access token to make an API request (e.g., access a protected resource).
-- If the access token is still valid and the server processes the request successfully, the token is reusable post-logout, confirming the vulnerability.
+- Before logging out, intercept an API request that uses the access_token for authentication.
+- Send this intercepted request to the Repeater tool in Burp Suite.
+- Log out of the application and monitor if a token revocation request is sent to the OAuth server.
+- Replay the saved API request in Repeater with the same access_token after logging out.
+- If the request succeeds, the token is still valid, confirming reusability.
 
 **9. Reuse of Email for Multiple Accounts**
 - Go to the target website's signup page.
-- Register a new account using an email address (`email@gmail.com`).
-- Attempt to create another account using the same email address with an alias (`email+alias@gmail.com`).
+- Register a new account using an email address (`sureshrvs604403@gmail.com`).
+- Attempt to create another account using the same email address with an alias (`sureshrvs604403+test@gmail.com`).
 - Complete the registration process for both accounts.
 - Observe if the system creates two separate accounts for the same email, bypassing validation.
 
