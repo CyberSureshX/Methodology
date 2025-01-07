@@ -182,7 +182,13 @@ cat allurls.txt | grep -E '\.xls|\.xml|\.xlsx|\.json|\.pdf|\.sql|\.doc|\.docx|\.
 - Log into the account using the weak password.
 - Observe if the application allows the use of weak passwords without enforcing a strong password policy.
 
-**11. Lack of Email Verification**
+**11. Account Enumeration via Error Messages on Signup Page**
+- Enter an existing email or username during signup.
+- Submit the form and check the error message.
+- Repeat with non-existent email/username and compare responses.
+- Observe if the error message discloses whether the account already exists.
+
+**12. Lack of Email Verification**
 - Go to the target website's signup page.
 - Register a new account using a fake or invalid email address (`invalid@fakeemail.com`).
 - Complete the registration process without verifying the email address.
@@ -262,7 +268,22 @@ cat allurls.txt | grep -E '\.xls|\.xml|\.xlsx|\.json|\.pdf|\.sql|\.doc|\.docx|\.
    "><img src=x onerror=prompt(document.domain)>- 
 - Submit the form and observe if the XSS payload executes.
 
-**11. insufficient validation in password reset tokens.**
+**11. Missing Server-Side Validation on Password Change Feature**
+- Navigate to the password change page.
+- Attempt to change the password by entering different values for the old password and the new password.
+- Intercept the request using Burp Suite.
+- Modify the intercepted request by replacing the new password value with the old password.
+- Forward the modified request.
+- Observe that the application accepts the old password as the new password. This indicates that the application does not perform proper server-side validation.
+
+**12. Delete Account Without Password**
+- Visit the website and log in to your account using valid credentials.
+- Navigate to the Profile or Settings section.
+- Locate the Delete Account button.
+- Click on the Delete Account button.
+- Observe that the account is successfully deleted without requiring password verification.
+
+**13. insufficient validation in password reset tokens.**
 - Create two accounts: one for the attacker and one for the victim.
 - Go to the target website and request a password reset for the victim's account.
 - Open the password reset link sent to the victim's email.
@@ -270,16 +291,7 @@ cat allurls.txt | grep -E '\.xls|\.xml|\.xlsx|\.json|\.pdf|\.sql|\.doc|\.docx|\.
 - Check if you are able to change the victim's password using the modified token.
 - If successful, this indicates a security flaw or bug in the system.
 
-**12. Self-XSS on Uber Password Reset Page** 
-- Go to `https://example.com/forgot-password` and initiate the password reset process.
-- Enter your email address and submit the request.
-- Open your mailbox and click on the password reset link you received.
-- On the password reset page, paste the following payload as your new password:  
-   ```html
-   "><img src=x onerror=prompt(document.domain)>
-- Submit the form and observe if the XSS payload executes.
-
-**13. Account Takeover via Password Reset Functionality**
+**14. Account Takeover via Password Reset Functionality**
 - Go to the password reset page of the target application.
 - Intercept the password reset request using Burp Suite.
 - Modify the email parameter in the password reset request with the following payloads one by one:  
@@ -291,7 +303,7 @@ cat allurls.txt | grep -E '\.xls|\.xml|\.xlsx|\.json|\.pdf|\.sql|\.doc|\.docx|\.
 - Forward the modified request to the server.
 - Check if the attacker’s email receives the password reset link or token.
 
-**14. Missing Expiry for Reset Token**
+**15. Missing Expiry for Reset Token**
 - Go to the target website's password reset page.
 - Submit the request with the victim's email address to trigger a password reset link.
 - Wait for the reset email to be received (`victim@example.com`).
