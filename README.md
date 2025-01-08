@@ -153,7 +153,7 @@ cat allurls.txt | grep -E '\.xls|\.xml|\.xlsx|\.json|\.pdf|\.sql|\.doc|\.docx|\.
 - Forward the modified request to the authorization server and continue with the OAuth flow.
 - Observe if the server redirects you to the attacker-controlled website.
 
-**7. Attacker creates an account**
+**7. Pre Account Takeover**
 - Attacker creates an account on the client application using the victim's email address (`victim@example.com`).
 - The attacker is prompted to verify the email address, but does not complete the verification process.
 - The victim register on the client application using a different signup method **OAuth flow** with the same email address (`victim@example.com`).
@@ -194,6 +194,85 @@ cat allurls.txt | grep -E '\.xls|\.xml|\.xlsx|\.json|\.pdf|\.sql|\.doc|\.docx|\.
 - Complete the registration process without verifying the email address.
 - Log into the account and perform normal operations.
 - Observe if the account is functional despite the invalid or unverified email.
+
+**13. Email verification bypass after signup**
+* Sign up on the web application using `attacker@mail.com`.
+* You will receive a confirmation email on `attacker@mail.com`, but do not open that link.
+* The application may ask for email confirmation. Check if it allows you to navigate to the account settings page without verification.
+* On the settings page, check if you can change the email.
+* If allowed, change the email to `victim@mail.com`.
+* You will be asked to confirm `victim@mail.com` by opening the confirmation link received on `victim@mail.com`. 
+* Instead of opening the new link, go to `attacker@mail.com` inbox and open the previously received link.
+* If the application verifies `victim@mail.com` using the previous verification link from `attacker@mail.com`, then this is an email verification bypass.
+
+**14. Email Authentication Bypass in the account registration process**
+* Create an account with `attacker@gmail.com`. Upon registration, you will receive an email verification link.
+* Click the link and verify the attacker account.
+* Go to the Edit Profile page and change the email to `victim@gmail.com`.
+* After changing the email, log out of the attacker account. You will receive a message: "A verification email has been sent to the new updated email."
+* Go to `attacker@gmail.com` inbox and click on the same verification link that was sent to you during initial registration.
+* Now go to the login page and enter `attacker@gmail.com` and the attacker’s password.
+* If successful, you have bypassed the email authentication.
+
+**15. Email Verification Bypass leads to account takeover**
+* Register any email address without verifying it.
+* Attempt to register an account again, but use a different method ('Sign up with Google') using the same email address.
+* The email verification is successfully bypassed.
+* The attacker can now log in using the victim's account, bypassing the verification methods.
+* **Reference**: [HackerOne Report 1074047](https://hackerone.com/reports/1074047).
+
+**16.Email Case Sensitivity Issue**
+- Go to the application's sign-up page and register with a valid email address, for example, user@example.com
+- Complete the registration process, ensuring the account is created successfully and is verified 
+- After successfully registering, log out, then go to the login page.
+- Try logging in using different variations of the email address, such as:
+
+```
+User@example.com (one uppercase)
+USER@example.com (all uppercase)
+UsEr@Example.com (mixed case)
+```
+- It means the application treats email addresses or usernames as case-sensitive and does not normalize them correctly before authentication.
+- If the application allows login with one of the variations but not others, this indicates a case sensitivity issue.
+
+**17. Predictable Email Verification Tokens**
+- Sign up with your email address to receive a verification email.
+- Inspect the verification link's token for patterns or predictability.
+- Generate or modify the token to target another email address.
+- Verify if the modified link can bypass email verification for another account.
+
+**18. Email Verification Link Reusability**
+- Sign up for an account using your email address and save the email verification link.
+- Verify the email address by clicking the verification link.
+- Log into the account and delete it through the account settings or profile page.
+- Sign up again with the same email address to create a new account.
+- Do not use the new verification link sent to your email. Instead, use the previously received verification link from the old account.
+- Observe if the old link successfully verifies the new account.
+
+**19. Improper Email Verification and Session Management**
+- Open the target application and log in using valid credentials for an existing account.
+- Go to the account settings and change your email address.
+- Check if the application automatically logs you out of your current session after submitting the email change.
+- Also, check if you receive an email verification link for the new email address.
+- If the application sends a verification email to the new address, do not click or verify the link yet.
+- Log out from the application.
+- Attempt to log back in using the original email address and password.
+- If you are still able to log in with the original credentials, check if the session remains active.
+- Test if you can access sensitive actions or perform account-related changes without verifying the new email address.
+- If the application allows you to continue using the old session or log in with the original email and password without verification, this confirms the vulnerability.
+
+**20. Email Verification Link Vulnerable to Open Redirect**
+- Sign up for an account and inspect the verification email link.
+- Look for parameters such as redirect=, url=, or similar in the link.
+- Modify the URL to point to a malicious website.
+- Verify if the link redirects the user to the attacker-controlled website.
+
+**21. No Server-Side Validation of Email Verification Token**
+- Sign up for an account to receive the verification link.
+- Intercept the verification request using Burp Suite or a similar tool.
+- Modify the token in the request (e.g., change it to a random string).
+- Observe if the server accepts the modified request without validating the token properly.
+
 
 ## PASSWORD RESET PAGE FUCNTIONALITY VULNERABILITIES 
 
@@ -311,33 +390,6 @@ cat allurls.txt | grep -E '\.xls|\.xml|\.xlsx|\.json|\.pdf|\.sql|\.doc|\.docx|\.
 - Observe if the token is still valid and allows password resetting after the expected expiration time.
 - If the token works after an extended period, the vulnerability is confirmed.
 
-## EMAIL VERIFICATION FUNCTIONALITY BYPASS
-
-**1. Email verification bypass after signup**
-* Sign up on the web application using `attacker@mail.com`.
-* You will receive a confirmation email on `attacker@mail.com`, but do not open that link.
-* The application may ask for email confirmation. Check if it allows you to navigate to the account settings page without verification.
-* On the settings page, check if you can change the email.
-* If allowed, change the email to `victim@mail.com`.
-* You will be asked to confirm `victim@mail.com` by opening the confirmation link received on `victim@mail.com`. 
-* Instead of opening the new link, go to `attacker@mail.com` inbox and open the previously received link.
-* If the application verifies `victim@mail.com` using the previous verification link from `attacker@mail.com`, then this is an email verification bypass.
-
-**2. Email Authentication Bypass in the account registration process**
-* Create an account with `attacker@gmail.com`. Upon registration, you will receive an email verification link.
-* Click the link and verify the attacker account.
-* Go to the Edit Profile page and change the email to `victim@gmail.com`.
-* After changing the email, log out of the attacker account. You will receive a message: "A verification email has been sent to the new updated email."
-* Go to `attacker@gmail.com` inbox and click on the same verification link that was sent to you during initial registration.
-* Now go to the login page and enter `attacker@gmail.com` and the attacker’s password.
-* If successful, you have bypassed the email authentication.
-
-**3. Email Verification Bypass leads to account takeover**
-* Register any email address without verifying it.
-* Attempt to register an account again, but use a different method ('Sign up with Google') using the same email address.
-* The email verification is successfully bypassed.
-* The attacker can now log in using the victim's account, bypassing the verification methods.
-* **Reference**: [HackerOne Report 1074047](https://hackerone.com/reports/1074047).
 
 ## LOGIN PAGE VULNERABILITIES 
 **1. SQL Injection - Authentication Bypass**
@@ -365,6 +417,24 @@ cat allurls.txt | grep -E '\.xls|\.xml|\.xlsx|\.json|\.pdf|\.sql|\.doc|\.docx|\.
 - Try logging in with a valid username and incorrect password.
 - Then, try logging in with an invalid username and incorrect password.
 - Observe the error messages. If they differ, the application may be vulnerable to account enumeration.
+
+**4. Cross-Site Scripting (XSS) on Login Page**
+- Navigate to the login page of the application.
+- Enter a payload like <script>alert('XSS')</script> in the username or password field.
+- Above method not work then try to create a payload as a password.
+- Submit the form and observe if the payload is executed in the response.
+- If the payload executes, this indicates an XSS vulnerability.
+
+**5. Missing Account Lockout Mechanism**
+- Go to the login page.
+- Attempt to log in with the correct username and random incorrect passwords multiple times.
+- Monitor if the account gets locked after a certain number of failed attempts.
+- If there’s no lockout, the application is vulnerable.
+
+**6. Session Fixation**
+- Visit the login page and capture the session ID before logging in.
+- Log in with valid credentials and check if the session ID remains the same.
+- If the session ID remains unchanged after authentication, this indicates session fixation.
 
 ## SESSION MANAGEMENT RELATED VULNERABILITIES
 
@@ -402,6 +472,18 @@ cat allurls.txt | grep -E '\.xls|\.xml|\.xlsx|\.json|\.pdf|\.sql|\.doc|\.docx|\.
 - Stay idle for an extended period (e.g., 30 minutes or longer) and attempt to perform an action.
 - Validate if the session remains active despite the inactivity.
 - Log out and attempt to use the same session ID to validate if the session was invalidated.
+
+**6. Insecure Session Storage**
+- Inspect how the session ID or tokens are stored.
+- Verify if sensitive session data is being stored in an insecure way in localStorage, without encryption.
+- If session data is stored insecurely or accessible via JavaScript there is a vulnerability.
+
+**7. Lack of Secure Cookies (Secure and HttpOnly Flags)**
+- Inspect the session cookies in the browser’s developer tools.
+- Verify if the Secure and HttpOnly flags are set for session cookies.
+- Test if cookies are being transmitted over HTTP connections or accessible via JavaScript.
+- If cookies are not marked with the Secure and HttpOnly flags, session data is vulnerable to man-in-the-middle attacks and XSS exploitation.
+
 
 ## TWO-FACTOR AUTHENTICATION (2FA) FUNCTIONALITY BYPASS
 
