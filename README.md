@@ -420,7 +420,7 @@ UsEr@Example.com (mixed case)
 
 **4. Cross-Site Scripting (XSS) on Login Page**
 - Navigate to the login page of the application.
-- Enter a payload like <script>alert('XSS')</script> in the username or password field.
+- Enter a payload like `<script>alert('XSS')</script>` in the username or password field.
 - Above method not work then try to create a payload as a password.
 - Submit the form and observe if the payload is executed in the response.
 - If the payload executes, this indicates an XSS vulnerability.
@@ -535,6 +535,21 @@ UsEr@Example.com (mixed case)
 - If OTPs do not expire, previously used OTPs may still be valid.
 - Save an old OTP.
 - Test it after several hours or days to see if it still works.
+
+**8. Lack of Rate Limiting on OTP Requests**
+- Register for an account or attempt to log in using a valid phone number or email address.
+- Repeatedly request an OTP using an automated script or tool like Burp Suite.
+- If unlimited OTPs can be requested without restrictions, the application is vulnerable.
+
+**9. OTP Validation on the Client Side**
+- Use browser developer tools to inspect the JavaScript code responsible for OTP validation.
+- Modify or disable the OTP validation code using tools a browser Inspect.
+- Observe if the application grants access without requiring server-side OTP validation.
+
+**10. Predictable OTP During the Verification**
+- Register two accounts using the same phone number but different email addresses.
+- Compare the OTPs sent for both accounts.
+- If the OTPs are identical or predictable based on shared data, the application is vulnerable.
 
 ## OPEN REDIRECTION VULNERABILITY
 **1. First Method**
@@ -705,6 +720,12 @@ X-Forwarded-Host: attacker-website.com
 - Modify the `Content-Type` header to `multipart/form-data`.
 - Replay the request and observe whether the server processes the altered request.
 
+**9. CSRF Token Not Rotating on Logout/Login**
+- Log in to the application and note the CSRF token.
+- Log out and log back in.
+- Verify if the CSRF token remains the same.
+- If the token doesn't change, it could indicate a vulnerability, as the same token might be reused maliciously.
+
 **9. References**
 - [OWASP CSRF Prevention Cheat Sheet](https://owasp.org/www-project-cheat-sheets/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html)
 - [Burp Suite CSRF Testing Guide](https://portswigger.net/web-security/csrf)
@@ -755,24 +776,10 @@ X-Forwarded-Host: attacker-website.com
 - Access the uploaded file URL.
 - Observe that the browser redirects to https://google.com.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+**5. Cross-Site Scripting (XSS) in File Names**
+- Rename a file to `<script>alert(1)</script>.jpg`.
+- Upload the file.
+- Check if the file name is reflected in the application without sanitization.
 
 
 
